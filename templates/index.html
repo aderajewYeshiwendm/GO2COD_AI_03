@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Number Guessing Game</h1>
+        <p>Think of a number between <strong>1</strong> and <strong>100</strong>. AI will guess it!</p>
+        <div id="game">
+            <p id="guess-text">Is your number <span id="guess">50</span>?</p>
+            <button onclick="sendHint('too low')">Too Low</button>
+            <button onclick="sendHint('too high')">Too High</button>
+            <button onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const guessText = document.getElementById("guess-text");
+        const guessSpan = document.getElementById("guess");
+
+        async function sendHint(hint) {
+            const response = await fetch("/process_hint", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ hint: hint }),
+            });
+            const data = await response.json();
+            guessSpan.textContent = data.guess;
+
+            if (data.guess === null) {
+                guessText.textContent = "Invalid range! Please reset.";
+            }
+        }
+
+        async function resetGame() {
+            const response = await fetch("/reset", { method: "POST" });
+            const data = await response.json();
+            guessSpan.textContent = data.guess;
+            guessText.textContent = `Is your number ${data.guess}?`;
+        }
+    </script>
+</body>
+</html>
